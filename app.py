@@ -2,24 +2,34 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# إعدادات القناة وشرط الدعوات الجديد
+# المتغيرات الأساسية المطلوبة
 INVITE_COUNT = 10
 CHANNEL_USERNAME = "@ALGOSPOR_PRO"
 
 @app.route('/')
-def hello_world():
-    return f'مرحباً بك معنا في قناة {CHANNEL_USERNAME} - نظام الإحالة يعمل بنجاح (الشرط: {INVITE_COUNT} أشخاص).'
+def home():
+    return f"Bot is running successfully for {CHANNEL_USERNAME}"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    # هنا يتم استقبال بيانات تيليجرام ومعالجة أمر /start والعداد
     data = request.get_json()
     
-    # يمكنك وضع منطق البوت هنا أو تخصيصه حسب الحاجة
-    # النص المحدث الذي يظهر للمستخدم:
-    # دعواتك: 0/10
-    # قم بدعوة 10 أشخاص للحصول على رابط القناة.
-    
+    if data and 'message' in data:
+        message = data['message']
+        chat_id = message['chat']['id']
+        text = message.get('text', '')
+        
+        if text.startswith('/start'):
+            # النص البرمجي المحدث بالكامل ليطلب 10 أشخاص
+            response_text = (
+                f"مرحباً بك في قناة {CHANNEL_USERNAME}!\n\n"
+                f"رابط الدعوة الخاص بك:\n"
+                f"https://t.me/AlgoLiveSportEntryBot?start={chat_id}\n\n"
+                f"دعواتك: 0/{INVITE_COUNT}\n"
+                f"قم بدعوة {INVITE_COUNT} أشخاص للحصول على رابط القناة."
+            )
+            # هنا يتم إرسال الرد عبر تيليجرام API (يمكنك ربطه بالتوكن الخاص بك)
+            
     return "OK", 200
 
 if __name__ == '__main__':
