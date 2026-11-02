@@ -4,7 +4,6 @@ import requests
 
 app = Flask(__name__)
 
-# التوكن الخاص بك مدمج هنا
 BOT_TOKEN = "8938576468:AAEg4RFPYbKYav4nLZJuUFwQFgYd5OEimY8"
 INVITE_COUNT = 10
 CHANNEL_USERNAME = "@ALGOSPOR_PRO"
@@ -16,33 +15,37 @@ def home():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    json_data = request.get_json()
-    if json_data and 'message' in json_data:
-        message = json_data['message']
-        chat_id = message['chat']['id']
-        text = message.get('text', '')
+    try:
+        json_data = request.get_json(force=True, silent=True)
+        print("Received webhook data:", json_data)
         
-        if text.startswith('/start'):
-            # رابط الإحالة الخاص بالمستخدم
-            ref_link = f"https://t.me/{BOT_USERNAME}?start={chat_id}"
+        if json_data and 'message' in json_data:
+            message = json_data['message']
+            chat_id = message['chat']['id']
+            text = message.get('text', '')
             
-            # النص المحدث بالطلب الجديد (10 أشخاص)
-            response_text = (
-                f"مرحباً بك في قناة {CHANNEL_USERNAME}!\n\n"
-                f"رابط الدعوة الخاص بك:\n{ref_link}\n\n"
-                f"دعواتك: 0/{INVITE_COUNT}\n"
-                f"قم بدعوة {INVITE_COUNT} أشخاص للحصول على رابط القناة."
-            )
-            
-            # إرسال الرسالة عبر تليجرام API
-            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-            payload = {
-                "chat_id": chat_id,
-                "text": response_text
-            }
-            requests.post(url, json=payload)
-            
+            if text.startswith('/start'):
+                ref_link = f"https://t.me/{BOT_USERNAME}?start={chat_id}"
+                response_text = (
+                    f"مرحباً بك في قناة {CHANNEL_USERNAME}!\n\n"
+                    f"رابط الدعوة الخاص بك:\n{ref_link}\n\n"
+                    f"دعواتك: 0/{INVITE_COUNT}\n"
+                    f"قم بدعوة {INVITE_COUNT} أشخاص للحصول على رابط القناة."
+                )
+                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+                payload = {
+                    "chat_id": chat_id,
+                    "text": response_text
+                }
+                res = requests.post(url, json=payload)
+                print("Telegram API response:", res.text)
+                
+    except Exception as e:
+        print("Error processing webhook:", e)
+        
     return "OK", 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
