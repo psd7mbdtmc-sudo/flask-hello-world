@@ -10,12 +10,8 @@ TELEGRAM_URL = f"https://api.telegram.org/bot{TOKEN}"
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
 def catch_all(path):
-    print(f"--- Received Request on Path: /{path} ---")
-    
     if request.method == 'POST':
         data = request.get_json(silent=True)
-        print(f"Data: {data}")
-        
         if data and 'message' in data:
             chat_id = data['message']['chat']['id']
             text = data['message'].get('text', '')
@@ -25,7 +21,7 @@ def catch_all(path):
                     "أهلاً بك في القناة! 📊⚽\n\n"
                     "لكي تتمكن من الانضمام إلى القسم الخاص والحصول على رابط الدخول، يُشترط دعوة 10 أشخاص عبر رابط الدعوة الخاص بك. بعد الانتهاء سوف يصلك رابط القناة للدخول.\n\n"
                     "رابط الدعوة الخاص بك:\n"
-                    "https://t.me/ALGOSPORTPRO"
+                    "https://t.me/ALGOLIVESPORTPRO"
                 )
                 
                 send_url = f"{TELEGRAM_URL}/sendMessage"
@@ -33,8 +29,7 @@ def catch_all(path):
                     "chat_id": chat_id,
                     "text": welcome_message
                 }
-                res = requests.post(send_url, json=payload)
-                print(f"Telegram Send Response: {res.text}")
+                requests.post(send_url, json=payload)
                 
         return "ok", 200
         
